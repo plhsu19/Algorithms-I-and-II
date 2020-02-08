@@ -68,9 +68,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         int r = StdRandom.uniform(n); // r is a random int within[0, n),    ~ c
         Item item = rqueue[r];        // return a random item at rqueue[r], ~ c
         // move all items with index larger than r to one index left(index - 1)
-        for (int i = r; i < (n - 1); i++) rqueue[i] = rqueue[i + 1];    //  ~ cn
-        rqueue[--n] = null;
-        if (n > 0 && n == rqueue.length / 4) resize(rqueue.length / 2); //  ~ cn
+        rqueue[r] = rqueue[--n];      //  insert the empty slot with the item in the tail ~ c
+        rqueue[n] = null;
+        if (n > 0 && n == rqueue.length / 4)
+            resize(rqueue.length / 2); //  ~ cn but ~ c for amortised because it rarely happens
         return item;
     }
 
