@@ -16,8 +16,7 @@ import java.util.List;
 public class FastCollinearPoints {
 
 
-    private Point[] pArray;
-    private LineSegment[] lsArray;
+    private final LineSegment[] lsArray;
 
     // finds all line segments containing 4 or more points
     public FastCollinearPoints(Point[] points) {
@@ -30,7 +29,9 @@ public class FastCollinearPoints {
                     "arg array of FastCollinearPoints cannot contain null point");
         }
 
-        pArray = points;  // sort points according to their natural comparison(y then x-coordinate)
+        Point[] pArray = Arrays.copyOf(points, points.length);
+
+        // sort points according to their natural comparison(y then x-coordinate)
         Arrays.sort(pArray, 0, pArray.length);
         // ArrayList to temperarly store the line segments1
         List<LineSegment> tempList = new ArrayList<LineSegment>();
@@ -43,10 +44,10 @@ public class FastCollinearPoints {
 
         // for (int r = 0; r < pArray.length; r++) StdOut.println(pArray[r]);
 
-        Comparator<Point> ctest = pArray[0].slopeOrder();
+        /* Comparator<Point> ctest = pArray[0].slopeOrder();
         double s1 = pArray[0].slopeTo(pArray[1]);
         double s3 = pArray[0].slopeTo(pArray[3]);
-        int testCompare = ctest.compare(pArray[1], pArray[3]);
+        int testCompare = ctest.compare(pArray[1], pArray[3]); */
 
         /* StdOut.println("slope of p1:" + s1);
         StdOut.println("slope of p3:" + s3);
@@ -105,7 +106,9 @@ public class FastCollinearPoints {
     }
 
     public LineSegment[] segments() {
-        return lsArray;
+        // copy and return a defensive array for lsArray
+        LineSegment[] defLsArray = Arrays.copyOf(lsArray, lsArray.length);
+        return defLsArray;
     }
 
     // test client

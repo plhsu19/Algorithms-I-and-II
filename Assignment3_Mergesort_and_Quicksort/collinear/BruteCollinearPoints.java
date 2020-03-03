@@ -14,9 +14,7 @@ import java.util.List;
 
 public class BruteCollinearPoints {
 
-    // sorted array of points
-    private Point[] pArray;
-    private LineSegment[] lsArray;
+    private final LineSegment[] lsArray;
 
     // finds all line segments containing 4 points
     public BruteCollinearPoints(Point[] points) {
@@ -29,7 +27,13 @@ public class BruteCollinearPoints {
                     "arg array of BruteCollinearPoints cannot contain null point");
         }
 
-        pArray = points;
+
+        // copy objects of points to a defensive array pArray
+        // sorted array of points
+        Point[] pArray = new Point[points.length];
+        for (int i = 0; i < points.length; i++) {
+            pArray[i] = points[i];
+        }
         Arrays.sort(pArray, 0, pArray.length);
 
         // raise error if there is duplicated points in argument array
@@ -70,7 +74,9 @@ public class BruteCollinearPoints {
 
     // the line segments
     public LineSegment[] segments() {
-        return lsArray;
+        // make an defensive copy of lsArray
+        LineSegment[] defLsArray = Arrays.copyOf(lsArray, lsArray.length);
+        return defLsArray;
     }
 
     // test client
