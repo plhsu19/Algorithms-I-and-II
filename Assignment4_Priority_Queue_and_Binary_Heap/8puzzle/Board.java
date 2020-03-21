@@ -100,7 +100,7 @@ public class Board {
         if (y == null) return false;
         if (this.getClass() != y.getClass()) return false;
         Board that = (Board) y;
-        
+
         if (this.dimension() != that.dimension()) return false;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {

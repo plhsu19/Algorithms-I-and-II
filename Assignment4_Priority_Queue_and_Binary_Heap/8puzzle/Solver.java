@@ -2,7 +2,7 @@
  *  Name: Pei-Lun Hsu
  *  Date: 18.03.2020
  *  Description: Implement A* algorithm based on piority queue to solve the
- *               8-Puzzle problem
+ *               8-Puzzle
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
@@ -141,6 +141,7 @@ public class Solver {
             return solutionS;
         }
         else return null;
+        problem
     }
 
     // test client (see below)
