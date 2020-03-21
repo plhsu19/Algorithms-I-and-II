@@ -6,13 +6,11 @@
 
 import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.StdRandom;
 
 public class Board {
 
     private final int n;
     private final int[][] tiles;
-    private Stack<Board> neighborBoards = new Stack<Board>();
     private final int iB, jB;
 
     // create a board from an n-by-n array of tiles,
@@ -34,6 +32,7 @@ public class Board {
         }
         iB = iOfBlank;
         jB = jOfBlank;
+
     }
 
     // string representation of this board
@@ -101,6 +100,8 @@ public class Board {
         if (y == null) return false;
         if (this.getClass() != y.getClass()) return false;
         Board that = (Board) y;
+        
+        if (this.dimension() != that.dimension()) return false;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (tiles[i][j] != that.tiles[i][j]) return false;
@@ -112,8 +113,10 @@ public class Board {
     // all neighboring boards
     // Details: return a Stack<Board> object (which implements Interable<Board>) that
     // contains neighbor boards w.r.t. current board
-
     public Iterable<Board> neighbors() {
+
+        Stack<Board> neighborBoards = new Stack<Board>();
+
         // move the left tile to the blank (if exits)
         if (jB - 1 >= 0) {
             tiles[iB][jB] = tiles[iB][jB - 1];
@@ -160,13 +163,28 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
-        int[] idx = new int[4];
-        do {
-            for (int k = 0; k < 4; k++) {
-                idx[k] = StdRandom.uniform(n);
+
+        int[] idx = new int[4]; // exchangable indices for twin
+        boolean foundFirst = false;
+        boolean foundSecond = false;
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (tiles[i][j] == 0) continue;
+                else if (!foundFirst) {
+                    idx[0] = i;
+                    idx[1] = j;
+                    foundFirst = true;
+                }
+                else if (!foundSecond) {
+                    idx[2] = i;
+                    idx[3] = j;
+                    foundSecond = true;
+                }
+                else break;
             }
-        } while ((idx[0] == idx[2] && idx[1] == idx[3]) ||
-                (tiles[idx[0]][idx[1]] == 0) || (tiles[idx[2]][idx[3]] == 0));
+            if (foundSecond) break;
+        }
 
         // exchange the tiles
         int temp = tiles[idx[0]][idx[1]];
@@ -184,9 +202,9 @@ public class Board {
 
     // unit testing (not graded)
     public static void main(String[] args) {
-        int[][] testPuzzle1 = { { 8, 1, 3 }, { 4, 0, 2 }, { 7, 6, 5 } };
+        int[][] testPuzzle1 = { { 0, 1, 3 }, { 4, 8, 2 }, { 7, 6, 5 } };
         int[][] testPuzzle2 = { { 8, 1, 3 }, { 4, 0, 2 }, { 7, 6, 5 } };
-        int[][] testPuzzle3 = { { 8, 1, 3 }, { 4, 5, 2 }, { 7, 6, 0 } };
+        int[][] testPuzzle3 = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 0 } };
         Board testBoard1 = new Board(testPuzzle1);
         Board testBoard2 = new Board(testPuzzle2);
         Board testBoard3 = new Board(testPuzzle3);
@@ -195,6 +213,8 @@ public class Board {
         StdOut.println("Hamming distance: " + testBoard1.hamming());
         StdOut.println("Manhattan distance: " + testBoard1.manhattan());
         StdOut.println("testBoard1 reaches Goal: " + testBoard1.isGoal());
+        StdOut.println("testBoard3 reaches Goal: " + testBoard3.isGoal());
+        StdOut.println("testBoard3's Manhattan Distance: " + testBoard3.manhattan());
         StdOut.println("testBoard1 is equal to testBoard2: " + testBoard1.equals(testBoard2));
         StdOut.println("testBoard1 is equal to testBoard3: " + testBoard1.equals(testBoard3));
         StdOut.println("--------------------------------------------------------------------");
@@ -207,6 +227,7 @@ public class Board {
         StdOut.println(testBoard1);
         StdOut.println("--------------------------------------------------------------------");
         StdOut.println("the twin of testBoard1: ");
+        StdOut.println(testBoard1.twin());
         StdOut.println(testBoard1.twin());
         StdOut.println("testBoard1 after calling twin(): ");
         StdOut.println(testBoard1);
