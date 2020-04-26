@@ -9,6 +9,7 @@ import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.SET;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.StdRandom;
 
 public class PointSET {
 
@@ -19,7 +20,7 @@ public class PointSET {
         pointSet = new SET<>();
     }
 
-    // rasie exception function
+    // rasie exception if input arg is null
     private void checkArgument(Object arg) {
         if (arg == null)
             throw new IllegalArgumentException("the argument of this mehtod cannot be null!");
@@ -38,8 +39,8 @@ public class PointSET {
     // add the point to the set (if it is not already in the set)
     public void insert(Point2D p) {
         checkArgument(p);
-        pointSet.add(p);
-
+        Point2D point = new Point2D(p.x(), p.y());
+        pointSet.add(point);
     }
 
     // does the set contain point p?
@@ -51,9 +52,12 @@ public class PointSET {
     // draw all points to standard draw
     public void draw() {
 
+        double penRadius = 0.01;
+        StdDraw.setPenRadius(penRadius);
+        StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.enableDoubleBuffering();
         for (Point2D p : pointSet) {
-            StdDraw.point(p.x(), p.y());
+            p.draw();
         }
         // StdDraw.show();
     }
@@ -74,10 +78,11 @@ public class PointSET {
         checkArgument(p);
         double minDistance = Double.POSITIVE_INFINITY;
         Point2D nearestP = null;
+        // if the point Set is empty, return null (no nearest point)
         if (pointSet.isEmpty()) return null;
 
         for (Point2D point : pointSet) {
-            double distance = p.distanceTo(point);
+            double distance = p.distanceSquaredTo(point);
             if (distance < minDistance) {
                 minDistance = distance;
                 nearestP = point;
@@ -86,12 +91,9 @@ public class PointSET {
         return nearestP;
     }
 
+    // method return the min point in the SET, only for testing
     private Point2D minPoint() {
         return pointSet.min();
-    }
-
-    private Point2D maxPoint() {
-        return pointSet.max();
     }
 
     // unit testing of the methods (optional)
@@ -100,14 +102,14 @@ public class PointSET {
         // test constructor()
         PointSET testSet = new PointSET();
         PointSET testSet2 = new PointSET();
+        RectHV testRect = new RectHV(0.3, 0.2, 0.43, 0.5);
 
         // test insert()
-        for (int i = 1; i < 21; i++) {
-            for (int j = 1; j < 21; j++) {
-                // double y = StdRandom.uniform(0.0, 20.0);
-                Point2D p = new Point2D((double) i, (double) j);
-                testSet.insert(p);
-            }
+        for (int i = 0; i < 100; i++) {
+            double x = StdRandom.uniform(0.0, 1.0);
+            double y = StdRandom.uniform(0.0, 1.0);
+            Point2D p = new Point2D(x, y);
+            testSet.insert(p);
         }
 
 
@@ -133,16 +135,13 @@ public class PointSET {
         // Point2D pointIn2 = testSet.maxPoint();
         StdOut.println("testSet contains point " + pointIn1 + ": " + testSet.contains(pointIn1));
         // Point2D pointOut1 = new Point2D(0.0, 0.0);
-        Point2D pointOut2 = new Point2D(10.5, 10.5);
+        Point2D pointOut2 = new Point2D(0.4, 0.5);
         StdOut.println("testSet contains point " + pointOut2 + ": " + testSet.contains(pointOut2));
 
 
-        // test drawing
-        RectHV testRect = new RectHV(5.3, 2.2, 6.3, 10.5);
-        StdDraw.setXscale(0.0, 20.0);
-        StdDraw.setYscale(0.0, 20.0);
-        StdDraw.setPenRadius(0.005);
-        StdDraw.setPenColor(StdDraw.BLUE);
+        // test draw()
+        // StdDraw.setXscale(0.0, 20.0);
+        // StdDraw.setYscale(0.0, 20.0);
         testSet.draw();
         StdDraw.setPenRadius(0.005);
         StdDraw.setPenColor(StdDraw.PRINCETON_ORANGE);
@@ -150,7 +149,7 @@ public class PointSET {
         StdDraw.show();
 
         // test nearest()
-        Point2D pointTest = new Point2D(14.2, 7.9);
+        Point2D pointTest = new Point2D(0.2, 0.9);
         StdOut.println(
                 "The nearest point in set to " + pointTest + " is: " + testSet.nearest(pointTest));
 
