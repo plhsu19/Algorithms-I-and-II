@@ -114,6 +114,8 @@ public class PointSET {
 
 
         // test size()
+        assert (testSet.size() == 100);
+        assert (testSet2.size() == 0);
         StdOut.println("size of PointSet: " + testSet.size());
         StdOut.println("size of PointSet2: " + testSet2.size());
 
@@ -150,8 +152,15 @@ public class PointSET {
 
         // test nearest()
         Point2D pointTest = new Point2D(0.2, 0.9);
+        Point2D nearestPoint = testSet.nearest(pointTest);
+        StdDraw.setPenColor(StdDraw.BOOK_RED);
+        StdDraw.setPenRadius(0.03);
+        pointTest.draw();
+        StdDraw.setPenColor(StdDraw.MAGENTA);
+        nearestPoint.draw();
+        StdDraw.show();
         StdOut.println(
-                "The nearest point in set to " + pointTest + " is: " + testSet.nearest(pointTest));
+                "The nearest point in set to " + pointTest + " is: " + nearestPoint);
 
         // test range()
         Iterable<Point2D> rangeSet = testSet.range(testRect);

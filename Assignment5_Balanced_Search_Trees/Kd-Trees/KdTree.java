@@ -11,10 +11,17 @@ import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
 
+import java.util.ArrayList;
+
 public class KdTree {
 
+    // constant corresponding to vertical split of search level in the tree
+    private static final int VERTICAL = 0;
+    // root of the tree, internal private Node type
     private Node root;
+    // number of items have been inserted
     private int size;
+
 
     // construct an empty set of points
     public KdTree() {
@@ -54,8 +61,10 @@ public class KdTree {
     }
 
     // helper method (recursive) to insert a node
-    // orientation: h % 2 == 0 -> vertiacal, h % 2 == 1 -> horizonal
-    private Node put(Point2D p, Node n, int h, double xmin, double ymin, double xmax, double ymax) {
+    // orientation: searchLevel % 2 == VERITCAL -> vertical split, searchLevel % 2 == HORIZONTAL -> horizonal split
+    private Node put(Point2D p, Node n, int level, double xmin, double ymin, double xmax,
+                     double ymax) {
+
         // base condition for the recursive:
         if (n == null) {
             RectHV rect = new RectHV(xmin, ymin, xmax, ymax);
@@ -63,32 +72,32 @@ public class KdTree {
             size += 1;
             return newNode;
         }
+
+        // recursively put the point into corresponding sub-tree or node according to
+        // the result of comparison of point to the node's point
         // even level: comparison of the x coordinate, vertical split.
-        if (h % 2 == 0) {
+        if (level % 2 == VERTICAL) {
             if (p.x() < n.point.x()) // p.x < node.x -> left child
-                n.lb = put(p, n.lb, h + 1, n.rect.xmin(), n.rect.ymin(), n.point.x(),
+                n.lb = put(p, n.lb, level + 1, n.rect.xmin(), n.rect.ymin(), n.point.x(),
                            n.rect.ymax());
-            else if (p.x() > n.point.x()) // p.x > node.x -> rigt child
-                n.rt = put(p, n.rt, h + 1, n.point.x(), n.rect.ymin(), n.rect.xmax(),
+            else if (Double.compare(p.x(), n.point.x()) == 0
+                    && Double.compare(p.y(), n.point.y()) == 0)
+                return n; // point == node.point -> point already exists in the tree
+            else  // p.x > node.x -> rigt child || p.x == n.x, p.y != n.y -> right child
+                n.rt = put(p, n.rt, level + 1, n.point.x(), n.rect.ymin(), n.rect.xmax(),
                            n.rect.ymax());
-                // p.x == n.x, p.y != n.y -> right child
-            else if (p.x() == n.point.x() && p.y() != n.point.y())
-                n.rt = put(p, n.rt, h + 1, n.point.x(), n.rect.ymin(), n.rect.xmax(),
-                           n.rect.ymax());
-            else return n; // point == node.point -> point already exists in the tree
         }
         // odd level: comparison of y coordiante, horizontal split.
         else {
             if (p.y() < n.point.y()) // p.y < node.y -> bottom child
-                n.lb = put(p, n.lb, h + 1, n.rect.xmin(), n.rect.ymin(), n.rect.xmax(),
+                n.lb = put(p, n.lb, level + 1, n.rect.xmin(), n.rect.ymin(), n.rect.xmax(),
                            n.point.y());
-            if (p.y() > n.point.y()) // p.y > node.y -> top child
-                n.rt = put(p, n.rt, h + 1, n.rect.xmin(), n.point.y(), n.rect.xmax(),
+            else if (Double.compare(p.x(), n.point.x()) == 0
+                    && Double.compare(p.y(), n.point.y()) == 0)
+                return n; // point == n.point -> point already existed
+            else // p.y > node.y || p.y == node.y, p.x != node.x  -> top child
+                n.rt = put(p, n.rt, level + 1, n.rect.xmin(), n.point.y(), n.rect.xmax(),
                            n.rect.ymax());
-            if (p.y() == n.point.y() && p.x() != n.point.x())
-                n.rt = put(p, n.rt, h + 1, n.rect.xmin(), n.point.y(), n.rect.xmax(),
-                           n.rect.ymax());
-            else return n;
         }
         return n;
     }
@@ -99,31 +108,30 @@ public class KdTree {
         root = put(p, root, 0, 0.0, 0.0, 1.0, 1.0);
     }
 
+    // private compare method that determined whether to compare points by
+    // x or y coordinate
+    private int comparePoints(Point2D a, Point2D b, int level) {
+        if (level % 2 == VERTICAL) return Double.compare(a.x(), b.x());
+        else return Double.compare(a.y(), b.y());
+    }
+
     // helper method(recursive) to check whether the Kd-tree contains point p
-    private boolean get(Point2D p, Node n, int h) {
+    private boolean get(Point2D p, Node n, int level) {
         // base condition
         if (n == null) {
             return false;
         }
-        // even level: comparison of the x coordinate, Left/Right.
-        if (h % 2 == 0) {
-            if (p.x() < n.point.x()) return get(p, n.lb, h + 1); // x < node.x -> check left child
-            else if (p.x() > n.point.x())
-                return get(p, n.rt, h + 1); // x > node.x -> check right child
-            else if (p.x() == n.point.x() && p.y() != n.point.y())
-                return get(p, n.rt, h + 1); // same x, different y -> check right child
-            else return true; // same x, same y -> find the point p in the tree
-        }
-        // odd level: comparison of y coordiante, Top/Bottom.
-        else {
-            if (p.y() < n.point.y()) return get(p, n.lb, h + 1); // y < node.y -> check bottom child
-            if (p.y() > n.point.y()) return get(p, n.rt, h + 1); // y > node.y -> check top child
-            if (p.y() == n.point.y() && p.x() != n.point.x())
-                return get(p, n.rt, h + 1); // same y, different x -> check top child
-            else return true; // same y, same x -> find the point p in the tree
-        }
-    }
+        // compare the target point with the node point, recursively search
+        // the child tree or return the point if matched
+        int comparison = comparePoints(p, n.point, level);
 
+        if (comparison < 0)
+            return get(p, n.lb, level + 1); // p.x < node.point.x -> check left child
+        else if (comparison == 0 && comparePoints(p, n.point, level + 1) == 0)
+            return true; // p == node.point -> point is found
+        else return get(p, n.rt, level + 1);  // (p.x > node.point.x) or
+        // (p.x == node.point.x, but p.y != node.point.y) -> check right child
+    }
 
     // does the set contain point p?
     public boolean contains(Point2D p) {
@@ -193,7 +201,7 @@ public class KdTree {
     }
 
     // helper method (recursive) to find the nearest neighbor in the tree to target point p
-    private Point2D nearest(Node n, Point2D p, Point2D nearestP, int h) {
+    private Point2D nearest(Node n, Point2D p, Point2D nearestP, int level) {
         // base condition
         if (n == null) return nearestP;
 
@@ -203,31 +211,19 @@ public class KdTree {
         // update the nearest point if the distance from p to current node's point is shorter
         if (p.distanceSquaredTo(n.point) < p.distanceSquaredTo(nearestP)) nearestP = n.point;
 
-        // Check the sub-trees of the current node:
-        // Even level, check which side of the vertical splitting line that p is on,
-        // then search subtree on that side firstly
-        if (h % 2 == 0) {
-            if (p.x() < n.point.x()) {
-                nearestP = nearest(n.lb, p, nearestP, h + 1);
-                nearestP = nearest(n.rt, p, nearestP, h + 1);
-            }
-            else {
-                nearestP = nearest(n.rt, p, nearestP, h + 1);
-                nearestP = nearest(n.lb, p, nearestP, h + 1);
-            }
+        // Check the sub-trees of the current node to find the nearest point,
+        // search the subtree on the same side as the target point p first
+        int comparison = comparePoints(p, n.point, level);
+
+        if (comparison < 0) {
+            nearestP = nearest(n.lb, p, nearestP, level + 1);
+            nearestP = nearest(n.rt, p, nearestP, level + 1);
         }
-        // Odd level, check which side of the horizontal splitting line that p is on,
-        // then search subtree on that side firstly
         else {
-            if (p.y() < n.point.y()) {
-                nearestP = nearest(n.lb, p, nearestP, h + 1);
-                nearestP = nearest(n.rt, p, nearestP, h + 1);
-            }
-            else {
-                nearestP = nearest(n.rt, p, nearestP, h + 1);
-                nearestP = nearest(n.lb, p, nearestP, h + 1);
-            }
+            nearestP = nearest(n.rt, p, nearestP, level + 1);
+            nearestP = nearest(n.lb, p, nearestP, level + 1);
         }
+
         return nearestP;
     }
 
@@ -243,26 +239,49 @@ public class KdTree {
 
 
     public static void main(String[] args) {
+
         // test constructor()
         KdTree testTree = new KdTree();
         KdTree testTree2 = new KdTree();
-        RectHV testRect = new RectHV(0.3, 0.2, 0.5, 0.5);
-        Point2D testPoint = new Point2D(StdRandom.uniform(0.0, 1.0), StdRandom.uniform(0.0, 1.0));
+        PointSET testSet = new PointSET();
 
-        // test insert()
-        for (int i = 0; i < 50; i++) {
+        // generate random points and rectangle for testing
+        int NUMBER = 1000;
+        ArrayList<Point2D> testPoints = new ArrayList<>();
+        for (int i = 0; i < NUMBER; i++) {
             double x = StdRandom.uniform(0.0, 1.0);
             double y = StdRandom.uniform(0.0, 1.0);
             Point2D p = new Point2D(x, y);
-            testTree.insert(p);
+            testPoints.add(p);
+        }
+        Point2D testPoint = new Point2D(StdRandom.uniform(0.0, 1.0), StdRandom.uniform(0.0, 1.0));
+        RectHV testRect = new RectHV(StdRandom.uniform(0.3, 0.5), StdRandom.uniform(0.2, 0.3),
+                                     StdRandom.uniform(0.52, 0.7), StdRandom.uniform(0.3, 0.6));
+
+
+        // test insert()
+        for (int i = 0; i < NUMBER; i++) {
+            testTree.insert(testPoints.get(i));
+            testSet.insert((testPoints.get(i)));
+
         }
 
         // test size()
+        assert (testTree.size() == NUMBER);
+        assert (testSet.size() == NUMBER);
+        assert (testTree2.size() == 0);
+
         StdOut.println("size of KdTree: " + testTree.size());
+        StdOut.println("size of testSet: " + testSet.size());
         StdOut.println("size of KdTree2: " + testTree2.size());
 
         // test isEmpty()
+        assert (!testTree.isEmpty());
+        assert (!testSet.isEmpty());
+        assert (testTree2.isEmpty());
+
         StdOut.println("Is KdTree empty? :" + testTree.isEmpty());
+        StdOut.println("Is testSet empty? :" + testSet.isEmpty());
         StdOut.println("Is KdTree2 empty? :" + testTree2.isEmpty());
 
 
@@ -277,38 +296,61 @@ public class KdTree {
 
         // test contain()
         // access the instance variable, only for testing within the KdTree class
-        Point2D pointIn = testTree.root.point;
+        Point2D pointIn = testPoints.get(3);
         Point2D pointOut = new Point2D(0.4, 0.5);
-        StdOut.println("testTree contains point " + pointIn + ": " + testTree.contains(pointIn));
-        StdOut.println("testTree contains point " + pointOut + ": " + testTree.contains(pointOut));
+        assert (testTree.contains(pointIn));
+        assert (testSet.contains(pointIn));
+        assert (!testTree.contains(pointOut));
+        assert (!testSet.contains(pointOut));
+        StdOut.println("KdTree contains point " + pointIn + ": " + testTree.contains(pointIn));
+        StdOut.println("testSet contains point " + pointIn + ": " + testSet.contains(pointIn));
+        StdOut.println("KdTree contains point " + pointOut + ": " + testTree.contains(pointOut));
+        StdOut.println("testSet contains point " + pointOut + ": " + testSet.contains(pointOut));
 
 
-        // test range() with a test rectangle
-        StdOut.println("points contained in rectangle " + testRect + " : ");
-        Iterable<Point2D> rangeResult = testTree.range(testRect);
-        for (Point2D p : rangeResult) {
+        // test range() with the test rectangle
+        int rangeNumTree = 0;
+        StdOut.println("points contained in rectangle " + testRect + " in KdTree : ");
+        Iterable<Point2D> rangeResultTree = testTree.range(testRect);
+        for (Point2D p : rangeResultTree) {
             StdOut.println(p);
+            rangeNumTree += 1;
         }
 
-        // StdOut.println("distance from (0.4, 0.4) to testRectangle: " + testRect.distanceTo(new Point2D(0.4, 0.4)));
+        int rangeNumSet = 0;
+        StdOut.println("points contained in rectangle " + testRect + " in testSet : ");
+        Iterable<Point2D> rangeResultSet = testSet.range(testRect);
+        for (Point2D p : rangeResultSet) {
+            StdOut.println(p);
+            rangeNumSet += 1;
+        }
+        // assert (rangeResultTree.equals(rangeResultSet));
+        StdOut.println("number of points contained in rectangle " + testRect + " in KdTree : "
+                               + rangeNumTree);
+        StdOut.println("number of points contained in rectangle " + testRect + " in testSet : "
+                               + rangeNumSet);
+
 
         // test nearest() with a test point
-        Point2D nearestPoint = testTree.nearest(testPoint);
+        Point2D nearestPointTree = testTree.nearest(testPoint);
+        Point2D nearestPointSet = testSet.nearest(testPoint);
+        assert (nearestPointTree.equals(nearestPointSet));
         StdOut.println(
-                "point in tree that is nearest to point " + testPoint + " : " + nearestPoint);
-
+                "point in tree that is nearest to point " + testPoint + " : " + nearestPointTree);
+        StdOut.println(
+                "point in Set that is nearest to point " + testPoint + " : " + nearestPointSet);
 
         // test draw()
         StdDraw.setPenRadius(0.005);
         StdDraw.setPenColor(StdDraw.GREEN);
         testRect.draw();
         testTree.draw();
-        StdDraw.setPenRadius(0.01);
+        StdDraw.setPenRadius(0.02);
         StdDraw.setPenColor(StdDraw.ORANGE);
         testPoint.draw();
-        StdDraw.setPenRadius(0.01);
+        StdDraw.setPenRadius(0.02);
         StdDraw.setPenColor(StdDraw.GREEN);
-        nearestPoint.draw();
+        nearestPointTree.draw();
         StdDraw.show();
 
     }
