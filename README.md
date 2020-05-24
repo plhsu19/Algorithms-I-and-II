@@ -9,6 +9,6 @@ Build a "Point" data structure that implements Comparable<> interface and with m
 #### Assignment4
 Create a "Board" data-type that models n-by-n puzzles with sliding tiles. Using binary heap based "Priority Queue" data structure to implement A* algorithm to solve the n-by-n puzzles. <br />Details: https://coursera.cs.princeton.edu/algs4/assignments/8puzzle/faq.php
 #### Assignment5: 
-Implementat a Kd-Tree (2D-Binary Search Tree) for 2D points storaging, range searching and nearest-neighbor searching, and compare its efficiency with the brute force approach.<br>
+Implement a Kd-Tree (2D-Binary Search Tree) for 2D points storaging, range searching and nearest-neighbor searching, then compare its correctness and efficiency with the brute force approach.<br>
 Details: https://coursera.cs.princeton.edu/algs4/assignments/kdtree/specification.php
-#### Assignment6: (Graph)
+#### Assignment6: (Graph) to be continued
