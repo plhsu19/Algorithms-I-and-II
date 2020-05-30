@@ -2,16 +2,20 @@
  *  Name: Pei-Lun Hsu
  *  Date: 25.04.2020
  *  Description: Implementation of Kd-Tree (BST) for range search and nearest-neighbor search
+ *  Notice: This is the version for runtime testing
  **************************************************************************** */
 
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
+import edu.princeton.cs.algs4.Stopwatch;
 
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 public class KdTree {
 
@@ -247,24 +251,81 @@ public class KdTree {
 
         // generate random points and rectangle for testing
         int NUMBER = 1000;
-        ArrayList<Point2D> testPoints = new ArrayList<>();
+        int NEARESTNUM = 1000; // 1M
+
+        // List of points for insertion runtime test
+        ArrayList<Point2D> testPoints
+                = new ArrayList<>();
         for (int i = 0; i < NUMBER; i++) {
             double x = StdRandom.uniform(0.0, 1.0);
             double y = StdRandom.uniform(0.0, 1.0);
             Point2D p = new Point2D(x, y);
             testPoints.add(p);
         }
-        Point2D testPoint = new Point2D(StdRandom.uniform(0.0, 1.0), StdRandom.uniform(0.0, 1.0));
-        RectHV testRect = new RectHV(StdRandom.uniform(0.3, 0.5), StdRandom.uniform(0.2, 0.3),
-                                     StdRandom.uniform(0.52, 0.7), StdRandom.uniform(0.3, 0.6));
 
-
-        // test insert()
-        for (int i = 0; i < NUMBER; i++) {
-            testSet.insert((testPoints.get(i)));
-            testTree.insert(testPoints.get(i));
+        // List of points for nearest() runtime test
+        ArrayList<Point2D> testPointList = new ArrayList<>();
+        for (int i = 0; i < NEARESTNUM; i++) {
+            testPointList
+                    .add(new Point2D(StdRandom.uniform(0.0, 1.0), StdRandom.uniform(0.0, 1.0)));
+            // System.out.println(testPointList.get(i));
         }
 
+        // RectHV testRect = new RectHV(StdRandom.uniform(0.3, 0.5), StdRandom.uniform(0.2, 0.3),
+        // StdRandom.uniform(0.52, 0.7), StdRandom.uniform(0.3, 0.6));
+
+
+        // test runtime of insert(): inserting N points
+        double runtime = 0.0;
+        for (int i = 0; i < NUMBER; i++) {
+            Stopwatch s = new Stopwatch();
+            testTree.insert(testPoints.get(i));
+            double elapsedTime = s.elapsedTime();
+            runtime += elapsedTime;
+        }
+
+        StdOut.println("runtime of inserting " + NUMBER + " Points : " + runtime);
+
+
+        // test runtime for nearest(): run time for finding the nearest point in the Kd-tree/PointSET
+        // with N points insterted
+        In in = new In(args[0]);
+        while (in.hasNextLine()) {
+            try {
+                double x = in.readDouble();
+                double y = in.readDouble();
+                Point2D point = new Point2D(x, y);
+                testTree2.insert(point);
+                testSet.insert(point);
+            }
+            catch (NoSuchElementException e) {
+                System.out.println("No more double tokens");
+                System.out.println("size of the tree: " + testTree2.size());
+                System.out.println("size of the point set: " + testSet.size());
+                break;
+            }
+        }
+
+        // runt time test for finding nearest point NEARESTNUM times in Kd-tree/PointSet
+        double runtimeNearest = 0.0;
+        for (int i = 0; i < NEARESTNUM; i++) {
+            Stopwatch s = new Stopwatch();
+            testSet.nearest(testPointList.get(i));
+            double elapsedTime = s.elapsedTime();
+            runtimeNearest += elapsedTime;
+        }
+
+        // System.out.println("nearest point test: " + testTree2.nearest(testPointList.get(2)));
+
+        System.out.println(
+                "runtime for performing " + NEARESTNUM + " nearest() for " + testSet.size()
+                        + " inserted points: " + runtimeNearest);
+        System.out.println(
+                "Average runtime for performing 1 nearest() for " + testSet.size()
+                        + " inserted points: " + (runtimeNearest / NEARESTNUM));
+
+
+        /*
         // test size()
         assert (testTree.size() == NUMBER);
         assert (testSet.size() == NUMBER);
@@ -351,6 +412,7 @@ public class KdTree {
         StdDraw.setPenColor(StdDraw.GREEN);
         nearestPointTree.draw();
         StdDraw.show();
+         */
 
     }
 }

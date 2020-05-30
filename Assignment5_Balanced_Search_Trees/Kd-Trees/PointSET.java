@@ -13,7 +13,7 @@ import edu.princeton.cs.algs4.StdRandom;
 
 public class PointSET {
 
-    private SET<Point2D> pointSet;
+    private SET<Point2D> pointSet; // Red-Black tree based
 
     // construct an empty set of points
     public PointSET() {
