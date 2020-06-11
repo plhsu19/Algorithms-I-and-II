@@ -22,10 +22,11 @@ Pei-Lun Hsu <br>
 	* Give expected running time in seconds (using tilde notation) to build a 2d-tree on n random points in the unit square:
     For normal BST, insert/search an item in to a BST with n items needs 1.39 lgn compares, i.e, Runtime ~ 1.39 lgn
     To insert n random points in Kd-tree, it will need:
-        1. Declaration of new Node: ~ n 
-        2. Compare to the Nodes: ~ 1.39 * (1 + lg2 + lg3 + lg4 + ... lg(n-1)) = 1.39 * (1 + lg(n!) - lg n) = T(n)
-        1.39c * (1 + 0.5nlgn - lgn)<= T(n) <= 1.39c * (1 + nlgn - lgn)
-        T(n) ~ (1.39 to 1.39/2) nlgn
+    1. Declaration of new Node: ~ n 
+    2. Compare with the Nodes: 
+    ~ 1.39 * (1 + lg2 + lg3 + lg4 + ... lg(n-1)) = 1.39 * (1 + lg(n!) - lg n) = T(n)
+    1.39c * (1 + 0.5nlgn - lgn) <= T(n) <= 1.39c * (1 + nlgn - lgn)
+    T(n) ~ (1.39 to 1.39/2) nlgn
     Model: T(n) ∈ O(nlgn), T(n) ∈ Ω (nlgn) => T(n) ∈ Θ(nlgn) (http://georgeballinger.ca/math126/lognfactorial.pdf)
     Because it is difficult to calculate the Tilde (leading term) of lgn!, I can only give expected astmptotic order of growth(Θ) for runtime T(n).
 	
