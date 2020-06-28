@@ -4,20 +4,39 @@
  *  Description:
  **************************************************************************** */
 
-
 public class Test {
-    public static void main(String[] args) {
 
-        double a = 0.0 / 0.0;
-        double b = 0.0 / 0.0;
-        Double aw = 0.0 / 0.0;
-        Double bw = 0.0 / 0.0;
-        System.out.println(a == b);
-        System.out.println(aw.equals(bw));
-        System.out.println(a);
-        System.out.println(aw);
-        System.out.println(b);
-        System.out.println(bw);
+    public static class Point {
+        private int x;
+        private int y;
+
+        public Point(int xc, int yc) {
+            x = xc;
+            y = yc;
+        }
+    }
+
+    public static class PointKey {
+        private Point p;
+        private boolean deleted;
+
+        public PointKey(Point pc) {
+            p = pc;
+            deleted = false;
+        }
+
+        public String toString() {
+            return "(x, y): " + p.x + " , " + p.y;
+        }
+    }
+
+
+    public static void main(String[] args) {
+        Point pointTest = new Point(1, 2);
+        PointKey pointKeyTest = new PointKey(pointTest);
+
+        System.out.println(pointKeyTest);
+
 
     }
 }
