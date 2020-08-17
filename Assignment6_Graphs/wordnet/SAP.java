@@ -6,8 +6,10 @@
  *               graph (as argument for constructor)
  **************************************************************************** */
 
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
@@ -28,40 +30,85 @@ public class SAP {
         throw new IllegalArgumentException("The argument cannot be null!");
     }
 
-    private void checkVertexArgument(int v) {
-        if (v < 0 || v >= digraph.V()) {
-            throw new IllegalArgumentException("The vertex argument is out of range!");
+    // private void checkVertexArgument(int v) {
+    //     if (v < 0 || v >= digraph.V()) {
+    //         throw new IllegalArgumentException("The vertex argument is out of range!");
+    //     }
+
+    // helper function to find the length of shortest path form 2 BFDS objects
+    private int shortestLength(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
+        int shortestPath = Integer.MAX_VALUE;
+        for (int i = 0; i < digraph.V(); i++) {
+            if (vBFS.hasPathTo(i) && wBFS.hasPathTo(i)) {
+                int path = vBFS.distTo(i) + wBFS.distTo(i);
+                if (path < shortestPath) shortestPath = path;
+            }
         }
+        if (shortestPath == Integer.MAX_VALUE) shortestPath = -1;
+
+        return shortestPath;
     }
+
+    // helper function to find the ancestor of shortest path form 2 BFDS objects
+    private int spa(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
+        int spa = -1;
+        int shortestPath = Integer.MAX_VALUE;
+
+        for (int i = 0; i < digraph.V(); i++) {
+            if (vBFS.hasPathTo(i) && wBFS.hasPathTo(i)) {
+                int path = vBFS.distTo(i) + wBFS.distTo(i);
+                if (path < shortestPath) {
+                    shortestPath = path;
+                    spa = i;
+                }
+            }
+        }
+        return spa;
+    }
+
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
-        // Check vertex arguments
-        checkVertexArgument(w);
-        checkVertexArgument(v);
+
+        // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from v and w
+        BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
+        BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
+
+        return shortestLength(vBFS, wBFS);
     }
 
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     public int ancestor(int v, int w) {
-        // Check vertex arguments
-        checkVertexArgument(w);
-        checkVertexArgument(v);
 
+        // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from v and w
+        BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
+        BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
+
+        return spa(vBFS, wBFS);
     }
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
         // check input iterable argument
         if (v == null || w == null) throwArgException();
-        // check the range of vertex in v and w
+
+        // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from iterable v and iterable w
+        BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
+        BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
+
+        return shortestLength(vBFS, wBFS);
     }
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
         // check input iterable argument
         if (v == null || w == null) throwArgException();
-        // check the range of vertex in v and w
 
+        // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from v and w
+        BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
+        BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
+
+        return spa(vBFS, wBFS);
     }
 
 
@@ -73,12 +120,38 @@ public class SAP {
         // The format is the number of vertices V, followed by the number of edges E, followed by E pairs of vertices, with each entry separated by whitespace.
         Digraph G = new Digraph(in);
         SAP sap = new SAP(G);
-        while (!StdIn.isEmpty()) {
-            int v = StdIn.readInt();
-            int w = StdIn.readInt();
-            int length = sap.length(v, w);
-            int ancestor = sap.ancestor(v, w);
-            StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+        Stack<Integer> v = new Stack<>();
+        Stack<Integer> w = new Stack<>();
+
+        StdOut.println("Digraph: " + G.toString());
+
+        StdOut.println("enter the vertex num of v set: ");
+        int numV = StdIn.readInt();
+        for (int i = 0; i < numV; i++) {
+            int vertex = StdIn.readInt();
+            v.push(vertex);
         }
+
+        StdOut.println("enter the vertex num of w set: ");
+        int numW = StdIn.readInt();
+        for (int i = 0; i < numW; i++) {
+            int vertex = StdIn.readInt();
+            w.push(vertex);
+        }
+
+        // int v = StdIn.readInt();
+        // int w = StdIn.readInt();
+        int length = sap.length(v, w);
+        int ancestor = sap.ancestor(v, w);
+        StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+
+        // test unit for testing single int v, w input
+        // while (!StdIn.isEmpty()) {
+        //     int v = StdIn.readInt();
+        //     int w = StdIn.readInt();
+        //     int length   = sap.length(v, w);
+        //     int ancestor = sap.ancestor(v, w);
+        //     StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+        // }
     }
 }
