@@ -35,7 +35,7 @@ public class SAP {
     //         throw new IllegalArgumentException("The vertex argument is out of range!");
     //     }
 
-    // helper function to find the length of shortest path form 2 BFDS objects
+    // helper function to find the length of shortest path form 2 BFDP objects
     private int shortestLength(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
         int shortestPath = Integer.MAX_VALUE;
         for (int i = 0; i < digraph.V(); i++) {
@@ -50,6 +50,7 @@ public class SAP {
     }
 
     // helper function to find the ancestor of shortest path form 2 BFDS objects
+    // should be further modularized!!!!
     private int spa(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
         int spa = -1;
         int shortestPath = Integer.MAX_VALUE;
@@ -71,6 +72,7 @@ public class SAP {
     public int length(int v, int w) {
 
         // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from v and w
+        // implicitly check if v and w are null in BreadthFirstDirectedPaths's constructor
         BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
         BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
 
@@ -81,6 +83,7 @@ public class SAP {
     public int ancestor(int v, int w) {
 
         // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from v and w
+        // implicitly check if v and w are null in BreadthFirstDirectedPaths's constructor
         BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
         BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
 
@@ -89,10 +92,11 @@ public class SAP {
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        // check input iterable argument
-        if (v == null || w == null) throwArgException();
+        // // check input iterable argument
+        // if (v == null || w == null) throwArgException();
 
         // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from iterable v and iterable w
+        // implicitly check if v and w are null or if v and w contains null item in BreadthFirstDirectedPaths's constructor
         BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
         BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
 
@@ -101,10 +105,11 @@ public class SAP {
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        // check input iterable argument
-        if (v == null || w == null) throwArgException();
+        // // check input iterable argument
+        // if (v == null || w == null) throwArgException();
 
         // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from v and w
+        // implicitly check if v and w are null or if v and w contains null item in BreadthFirstDirectedPaths's constructor
         BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
         BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
 
