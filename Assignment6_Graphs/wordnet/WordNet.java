@@ -8,7 +8,6 @@
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
-import edu.princeton.cs.algs4.StdOut;
 
 import java.util.HashMap;
 
@@ -19,15 +18,46 @@ public class WordNet {
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
-        // The input to the constructor does not correspond to a rooted DAG: check through datatype DAG's methods
 
+        // check if arguments are null
+        checkArgument(synsets);
+        checkArgument(hypernyms);
+
+        // initialize a hash map to store the nouns in synsets and their corresponding id
         synsetMap = new HashMap<>();
-        Digraph wordnet;
 
-        // read in synsets file (.txt) and store in a hash map(string, int[] with (noun, synsetId) as (key, value) pair
+        // read in synsets file (.txt) and store in a hash map(string, int[]) with (noun, synsetId) as (key, value) pair
+        int size = readSynsets(synsets);
+
+        // initialized a Digraph with number of vertex = size
+        wordnet = new Digraph(size);
+
+        // read in hypernyms file (.txt) and store the is-a relationships(edges) into wordnet
+        readHypernyms(hypernyms);
+
+        // StdOut.println(wordnet.V());
+        // StdOut.println(wordnet.E());
+
+
+        // check if wordnet is acyclic: use simple DFS
+
+    }
+
+    private void checkArgument(Object arg) {
+        if (arg == null)
+            throw new IllegalArgumentException(
+                    "the argument of the method or constructor cannot be null!");
+    }
+
+    // helper functions to read synsets
+    private int readSynsets(String synsets) {
+        int size = 0;
+
+        // read in synsets file (.txt) and store in a hash map(string, int[]) with (noun, synsetId) as (key, value) pair
         In in = new In(synsets);
         // read in each synset line
         while (in.hasNextLine()) {
+            size += 1;
             String line = in.readLine();
             String[] synFields = line.split(",");
 
@@ -40,17 +70,28 @@ public class WordNet {
                     synsetMap.put(noun, new Stack<Integer>());
                 }
                 synsetMap.get(noun).push(synsetId);
-                StdOut.println(noun);
-                StdOut.println(synsetMap.get(noun));
+                // StdOut.println(noun);
+                // StdOut.println(synsetId);
             }
         }
-
+        return size;
     }
 
-    private void checkArgument(Object arg) {
-        if (arg == null)
-            throw new IllegalArgumentException("the argument of this method cannot be null!");
+    // helper function to read in hypernyms (and build a Digraph)
+    private void readHypernyms(String hypernyms) {
+        In in = new In(hypernyms);
+        // for each line (each synset's edge to its hypernyms), store the edges into the digraph
+        while (in.hasNextLine()) {
+            String line = in.readLine();
+            String[] hyperFields = line.split(",");
+            int synset = Integer.parseInt(hyperFields[0]);
+
+            for (int i = 1; i < hyperFields.length; i++) {
+                wordnet.addEdge(synset, Integer.parseInt(hyperFields[i]));
+            }
+        }
     }
+
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
@@ -61,6 +102,7 @@ public class WordNet {
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
+        checkArgument(word);
         return true;
     }
 
