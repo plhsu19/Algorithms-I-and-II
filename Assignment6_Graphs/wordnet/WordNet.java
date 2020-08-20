@@ -8,6 +8,7 @@
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.StdOut;
 
 import java.util.HashMap;
 
@@ -15,6 +16,7 @@ public class WordNet {
 
     private HashMap<String, Stack<Integer>> synsetMap;
     private Digraph wordnet;
+    private int[] marked;
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -35,18 +37,28 @@ public class WordNet {
         // read in hypernyms file (.txt) and store the is-a relationships(edges) into wordnet
         readHypernyms(hypernyms);
 
-        // StdOut.println(wordnet.V());
-        // StdOut.println(wordnet.E());
+        // check if wordnet is a single rooted DAG (single rooted + acyclic)
+        checkRootedDAG();
 
+        StdOut.println(wordnet);
 
         // check if wordnet is acyclic: use simple DFS
+        // marked = new int[wordnet.V()];
+        // for (int i = 0; i < wordnet.V(); i++) {
+        //     if (!marked[i]) DFS(i);
+        // }
 
     }
 
     private void checkArgument(Object arg) {
         if (arg == null)
             throw new IllegalArgumentException(
-                    "the argument of the method or constructor cannot be null!");
+                    "The argument of the method or constructor cannot be null!");
+    }
+
+    private void throwNotRootedDAGException() {
+        throw new IllegalArgumentException(
+                "The wordnet is not a single rooted acyclic directed graph (Not DAG)");
     }
 
     // helper functions to read synsets
@@ -80,6 +92,7 @@ public class WordNet {
     // helper function to read in hypernyms (and build a Digraph)
     private void readHypernyms(String hypernyms) {
         In in = new In(hypernyms);
+
         // for each line (each synset's edge to its hypernyms), store the edges into the digraph
         while (in.hasNextLine()) {
             String line = in.readLine();
@@ -91,6 +104,29 @@ public class WordNet {
             }
         }
     }
+
+    // helper function to check if wordnet is single rooted and acyclic
+    private void checkRootedDAG() {
+        int rootNum = 0;
+        for (int v = 0; v < wordnet.V(); v++) {
+            if (wordnet.outdegree(v) == 0) rootNum += 1;
+            if (rootNum > 1) throwNotRootedDAGException();
+        }
+        if (rootNum != 1) throwNotRootedDAGException();
+    }
+
+
+    // helper function DFS used to check if wordnet (digraph) is acyclic
+    // private void DFS(int v) {
+    //     // if the vertex is already
+    //     marked[v] = true;
+    //
+    //     for (int w : wordnet.adj(v)) {
+    //         if (marked[v]) throw new IllegalArgumentException("the input digraph is not acyclic!");
+    //         DFS(w);
+    //     }
+    //
+    // }
 
 
     // returns all WordNet nouns
