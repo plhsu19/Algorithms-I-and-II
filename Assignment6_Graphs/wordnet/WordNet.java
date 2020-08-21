@@ -1,20 +1,24 @@
 /* *****************************************************************************
  *  Name: Pei-Lun Hsu
  *  Date: 13.08.2020
- *  Description: Use a DAG data structure to implement a linguistic WordNet which specifies
- *  the relations between synsets, ie, sets of nouns with the same meanings, and hypernyms
+ *  Description: Implement a ontological WordNet data-type which relationships of
+ *  synsets, ie, sets of nouns with the same meanings, and their hypernyms, ie,
+ *  ontological parent. The data-type WordNet also provides instance methods that
+ *  help find the shortest ancestral path between any two nouns in a word net.
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
 import java.util.HashMap;
 
 public class WordNet {
 
-    private HashMap<String, Stack<Integer>> synsetMap;
+    private HashMap<String, Stack<Integer>> synsetMap; // noun => [2, 5, 3, 9]
+    private HashMap<Integer, String> nounMap; // 3: "A-horizon A_horizon"
     private Digraph wordnet;
     private int[] marked;
 
@@ -25,8 +29,11 @@ public class WordNet {
         checkArgument(synsets);
         checkArgument(hypernyms);
 
-        // initialize a hash map to store the nouns in synsets and their corresponding id
+        // initialize a hash map to store the noun as key and its corresponding synset IDs as value
         synsetMap = new HashMap<>();
+
+        // initialize a hash map to store the synset ID as key and the nouns it includes as value
+        nounMap = new HashMap<>();
 
         // read in synsets file (.txt) and store in a hash map(string, int[]) with (noun, synsetId) as (key, value) pair
         int size = readSynsets(synsets);
@@ -40,14 +47,6 @@ public class WordNet {
         // check if wordnet is a single rooted DAG (single rooted + acyclic)
         checkRootedDAG();
 
-        StdOut.println(wordnet);
-
-        // check if wordnet is acyclic: use simple DFS
-        // marked = new int[wordnet.V()];
-        // for (int i = 0; i < wordnet.V(); i++) {
-        //     if (!marked[i]) DFS(i);
-        // }
-
     }
 
     private void checkArgument(Object arg) {
@@ -56,9 +55,13 @@ public class WordNet {
                     "The argument of the method or constructor cannot be null!");
     }
 
-    private void throwNotRootedDAGException() {
+    private void throwNotSingleRootedDAGException() {
         throw new IllegalArgumentException(
                 "The wordnet is not a single rooted acyclic directed graph (Not DAG)");
+    }
+
+    private void throwNounNotExistException() {
+        throw new IllegalArgumentException("The noun argument is not in the wordnet.");
     }
 
     // helper functions to read synsets
@@ -74,9 +77,13 @@ public class WordNet {
             String[] synFields = line.split(",");
 
             int synsetId = Integer.parseInt(synFields[0]);
+
+            // save the (id: string of synset nouns) into hash map
+            nounMap.put(synsetId, synFields[1]);
+
             String[] nouns = synFields[1].split(" ");
 
-            // add (noun, synsetId) of the synset into hash map
+            // add (noun: synsetId) of the synset into hash map
             for (String noun : nouns) {
                 if (!synsetMap.containsKey(noun)) {
                     synsetMap.put(noun, new Stack<Integer>());
@@ -110,9 +117,9 @@ public class WordNet {
         int rootNum = 0;
         for (int v = 0; v < wordnet.V(); v++) {
             if (wordnet.outdegree(v) == 0) rootNum += 1;
-            if (rootNum > 1) throwNotRootedDAGException();
+            if (rootNum > 1) throwNotSingleRootedDAGException();
         }
-        if (rootNum != 1) throwNotRootedDAGException();
+        if (rootNum != 1) throwNotSingleRootedDAGException();
     }
 
 
@@ -131,30 +138,46 @@ public class WordNet {
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
-        Stack<String> testStack = new Stack<>();
-
-        return testStack;
+        return synsetMap.keySet();
     }
 
     // is the word a WordNet noun?
+    // time complexity: O(1)
     public boolean isNoun(String word) {
         checkArgument(word);
-        return true;
+        return synsetMap.containsKey(word);
     }
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
-        // Any of the noun arguments in distance() or sap() is not a WordNet noun
+        // check if the argument is null
+        checkArgument(nounA);
+        checkArgument(nounB);
 
-        return 2;
+        // Check if any of the noun arguments is not a WordNet noun
+        if (!isNoun(nounA) || !isNoun(nounB)) throwNounNotExistException();
+
+        SAP shortestAncestralPath = new SAP(wordnet);
+        int d = shortestAncestralPath.length(synsetMap.get(nounA), synsetMap.get(nounB));
+
+        return d;
     }
 
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
-    // in a shortest ancestral path (defined below)
+    // in a shortest ancestral path
     public String sap(String nounA, String nounB) {
-        // Any of the noun arguments in distance() or sap() is not a WordNet noun
-        return "test";
+        // check if the argument is null
+        checkArgument(nounA);
+        checkArgument(nounB);
+
+        // Check if any of the noun arguments is not a WordNet noun
+        if (!isNoun(nounA) || !isNoun(nounB)) throwNounNotExistException();
+
+        SAP shortestAncestralPath = new SAP(wordnet);
+        int ancestor = shortestAncestralPath.ancestor(synsetMap.get(nounA), synsetMap.get(nounB));
+
+        return nounMap.get(ancestor);
     }
 
     // do unit testing of this class
@@ -162,7 +185,25 @@ public class WordNet {
         String synsetsFile = args[0];
         String hypernymsFile = args[1];
 
-        WordNet wordnet = new WordNet(synsetsFile, hypernymsFile);
+        WordNet testWordNet = new WordNet(synsetsFile, hypernymsFile);
+
+        // check nouns()
+
+        // check isNoun()
+
+        StdOut.println("Enter the first noun: ");
+        while (!StdIn.isEmpty()) {
+            String nounA = StdIn.readString();
+            StdOut.println("Enter the second noun: ");
+            String nounB = StdIn.readString();
+            StdOut.println(
+                    String.format("The distance of SAP between %s and %s: %d",
+                                  nounA, nounB, testWordNet.distance(nounA, nounB)));
+            StdOut.println(
+                    String.format("The common ancestor of SAP between %s and %s: %s",
+                                  nounA, nounB, testWordNet.sap(nounA, nounB)));
+
+        }
 
 
     }

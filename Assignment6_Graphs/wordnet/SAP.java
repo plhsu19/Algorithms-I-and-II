@@ -1,7 +1,7 @@
 /* *****************************************************************************
  *  Name: Pei-Lun Hsu
  *  Date: .08.2020
- *  Description: implement data type SAP to find the shortest ancestral paths
+ *  Description: Implement a data type SAP to find the shortest ancestral paths
  *               between any 2 vertex (or 2 vertices sets) in the given directed
  *               graph (as argument for constructor)
  **************************************************************************** */
