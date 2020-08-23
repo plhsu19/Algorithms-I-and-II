@@ -188,8 +188,23 @@ public class WordNet {
         WordNet testWordNet = new WordNet(synsetsFile, hypernymsFile);
 
         // check nouns()
+        for (String noun : testWordNet.nouns()) {
+            StdOut.println(noun);
+        }
 
-        // check isNoun()
+        // check isNoun(String noun)
+        StdOut.println("Enter the first noun to check if it is in the wordnet: ");
+        String noun1 = StdIn.readString();
+        StdOut.println(
+                String.format("The noun %s is in the wordnet: %b", noun1,
+                              testWordNet.isNoun(noun1)));
+
+        StdOut.println("Enter the first noun to check if it is in the wordnet: ");
+        String noun2 = StdIn.readString();
+        StdOut.println(
+                String.format("The noun %s is in the wordnet: %b", noun2,
+                              testWordNet.isNoun(noun2)));
+
 
         StdOut.println("Enter the first noun: ");
         while (!StdIn.isEmpty()) {

@@ -1,21 +1,44 @@
 /* *****************************************************************************
  *  Name: Pei-Lun Hsu
  *  Date: .08.2020
- *  Description:
+ *  Description: To find the outcast, i.e., the noun has most far relationship with
+ *               other nouns, among a set of nouns in the wordnet
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Outcast {
+
+    private WordNet wordnet;
+
     // constructor takes a WordNet object
     public Outcast(WordNet wordnet) {
+        checkArgument(wordnet);
+        this.wordnet = wordnet;
+    }
 
+    private void checkArgument(Object arg) {
+        if (arg == null)
+            throw new IllegalArgumentException(
+                    "The argument of the method or constructor cannot be null!");
     }
 
     // given an array of WordNet nouns, return an outcast
     public String outcast(String[] nouns) {
-
+        int maxDistance = 0;
+        String outcastNoun = null;
+        for (String noun : nouns) {
+            int distance = 0;
+            for (int i = 0; i < nouns.length; i++) {
+                distance += wordnet.distance(noun, nouns[i]);
+            }
+            if (distance > maxDistance) {
+                maxDistance = distance;
+                outcastNoun = noun;
+            }
+        }
+        return outcastNoun;
     }
 
     // see test client below
