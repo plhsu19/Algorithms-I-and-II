@@ -1,8 +1,11 @@
 /* *****************************************************************************
  *  Name: Pei-Lun Hsu
- *  Date: .08.2020
- *  Description: To find the outcast, i.e., the noun has most far relationship with
- *               other nouns, among a set of nouns in the wordnet
+ *  Date: 23.08.2020
+ *  Description: find the outcast, i.e., the noun has most far relationship with
+ *               other nouns, among a set of nouns in the wordnet by using
+ *               brute-force methods (O(n^2))
+ *               Noted: Algorithm could be improved if necessary (eg. the input
+ *                      size n is large.
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
@@ -10,7 +13,7 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class Outcast {
 
-    private WordNet wordnet;
+    private final WordNet wordnet;
 
     // constructor takes a WordNet object
     public Outcast(WordNet wordnet) {

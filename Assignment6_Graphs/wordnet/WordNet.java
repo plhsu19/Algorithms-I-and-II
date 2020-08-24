@@ -8,6 +8,7 @@
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdIn;
@@ -17,10 +18,9 @@ import java.util.HashMap;
 
 public class WordNet {
 
-    private HashMap<String, Stack<Integer>> synsetMap; // noun => [2, 5, 3, 9]
-    private HashMap<Integer, String> nounMap; // 3: "A-horizon A_horizon"
-    private Digraph wordnet;
-    private int[] marked;
+    private final HashMap<String, Stack<Integer>> synsetMap; // noun => [2, 5, 3, 9]
+    private final HashMap<Integer, String> nounMap; // 3: "A-horizon A_horizon"
+    private final Digraph wordnet;
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -44,8 +44,11 @@ public class WordNet {
         // read in hypernyms file (.txt) and store the is-a relationships(edges) into wordnet
         readHypernyms(hypernyms);
 
-        // check if wordnet is a single rooted DAG (single rooted + acyclic)
-        checkRootedDAG();
+        // check if wordnet is a directed acyclic graph (DAG)
+        checkAcyclic();
+
+        // check if wordnet is  single rooted
+        checkSingleRooted();
 
     }
 
@@ -57,7 +60,7 @@ public class WordNet {
 
     private void throwNotSingleRootedDAGException() {
         throw new IllegalArgumentException(
-                "The wordnet is not a single rooted acyclic directed graph (Not DAG)");
+                "The wordnet is not a single rooted or acyclic directed graph (Not DAG)");
     }
 
     private void throwNounNotExistException() {
@@ -112,8 +115,14 @@ public class WordNet {
         }
     }
 
-    // helper function to check if wordnet is single rooted and acyclic
-    private void checkRootedDAG() {
+    // helper function to check whether the wordnet has directed cycle
+    private void checkAcyclic() {
+        DirectedCycle DAG = new DirectedCycle(wordnet);
+        if (DAG.hasCycle()) throwNotSingleRootedDAGException();
+    }
+
+    // helper function to check if wordnet is single rooted
+    private void checkSingleRooted() {
         int rootNum = 0;
         for (int v = 0; v < wordnet.V(); v++) {
             if (wordnet.outdegree(v) == 0) rootNum += 1;
@@ -188,9 +197,9 @@ public class WordNet {
         WordNet testWordNet = new WordNet(synsetsFile, hypernymsFile);
 
         // check nouns()
-        for (String noun : testWordNet.nouns()) {
-            StdOut.println(noun);
-        }
+        // for (String noun : testWordNet.nouns()) {
+        //     StdOut.println(noun);
+        // }
 
         // check isNoun(String noun)
         StdOut.println("Enter the first noun to check if it is in the wordnet: ");
@@ -217,7 +226,7 @@ public class WordNet {
             StdOut.println(
                     String.format("The common ancestor of SAP between %s and %s: %s",
                                   nounA, nounB, testWordNet.sap(nounA, nounB)));
-
+            StdOut.println("Enter the first noun: ");
         }
 
 

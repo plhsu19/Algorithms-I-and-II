@@ -1,6 +1,6 @@
 /* *****************************************************************************
  *  Name: Pei-Lun Hsu
- *  Date: .08.2020
+ *  Date: 15.08.2020
  *  Description: Implement a data type SAP to find the shortest ancestral paths
  *               between any 2 vertex (or 2 vertices sets) in the given directed
  *               graph (as argument for constructor)
@@ -15,7 +15,7 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class SAP {
 
-    private Digraph digraph;
+    private final Digraph digraph;
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
@@ -30,10 +30,11 @@ public class SAP {
         throw new IllegalArgumentException("The argument cannot be null!");
     }
 
-    // private void checkVertexArgument(int v) {
-    //     if (v < 0 || v >= digraph.V()) {
-    //         throw new IllegalArgumentException("The vertex argument is out of range!");
-    //     }
+
+    private boolean iterableIsEmpty(Iterable<Integer> v) {
+        if (v == null) throwArgException();
+        return !v.iterator().hasNext();
+    }
 
     // helper function to find the length of shortest path form 2 BFDP objects
     private int shortestLength(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
@@ -50,7 +51,7 @@ public class SAP {
     }
 
     // helper function to find the ancestor of shortest path form 2 BFDS objects
-    // should be further modularized!!!!
+    // could be further modularized with shortestLength()!!!!
     private int spa(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
         int spa = -1;
         int shortestPath = Integer.MAX_VALUE;
@@ -92,8 +93,13 @@ public class SAP {
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        // // check input iterable argument
-        // if (v == null || w == null) throwArgException();
+        // check if input iterable argument is null implicitly by BreadthFirstDirectedPaths
+
+        // check if the iterable arguments is null or empty
+        // is null: throw exception
+        // is empty: return -1
+        if (iterableIsEmpty(v) || iterableIsEmpty(w)) return -1;
+
 
         // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from iterable v and iterable w
         // implicitly check if v and w are null or if v and w contains null item in BreadthFirstDirectedPaths's constructor
@@ -105,8 +111,12 @@ public class SAP {
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        // // check input iterable argument
-        // if (v == null || w == null) throwArgException();
+        // check if input iterable argument is null implicitly by BreadthFirstDirectedPaths
+
+        // check if the iterable arguments is null or empty
+        // is null: throw exception
+        // is empty: return -1
+        if (iterableIsEmpty(v) || iterableIsEmpty(w)) return -1;
 
         // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from v and w
         // implicitly check if v and w are null or if v and w contains null item in BreadthFirstDirectedPaths's constructor
