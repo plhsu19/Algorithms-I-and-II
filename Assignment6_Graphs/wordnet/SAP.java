@@ -36,25 +36,27 @@ public class SAP {
         return !v.iterator().hasNext();
     }
 
-    // helper function to find the length of shortest path form 2 BFDP objects
-    private int shortestLength(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
-        int shortestPath = Integer.MAX_VALUE;
-        for (int i = 0; i < digraph.V(); i++) {
-            if (vBFS.hasPathTo(i) && wBFS.hasPathTo(i)) {
-                int path = vBFS.distTo(i) + wBFS.distTo(i);
-                if (path < shortestPath) shortestPath = path;
-            }
-        }
-        if (shortestPath == Integer.MAX_VALUE) shortestPath = -1;
-
-        return shortestPath;
-    }
+    // // helper function to find the length of shortest path form 2 BFDP objects
+    // private int shortestLength(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
+    //     int shortestPath = Integer.MAX_VALUE;
+    //
+    //     for (int i = 0; i < digraph.V(); i++) {
+    //         if (vBFS.hasPathTo(i) && wBFS.hasPathTo(i)) {
+    //             int path = vBFS.distTo(i) + wBFS.distTo(i);
+    //             if (path < shortestPath) shortestPath = path;
+    //         }
+    //     }
+    //     if (shortestPath == Integer.MAX_VALUE) shortestPath = -1;
+    //
+    //     return shortestPath;
+    // }
 
     // helper function to find the ancestor of shortest path form 2 BFDS objects
     // could be further modularized with shortestLength()!!!!
-    private int spa(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
+    private int[] spa(BreadthFirstDirectedPaths vBFS, BreadthFirstDirectedPaths wBFS) {
         int spa = -1;
         int shortestPath = Integer.MAX_VALUE;
+        int[] returnValues = new int[2];
 
         for (int i = 0; i < digraph.V(); i++) {
             if (vBFS.hasPathTo(i) && wBFS.hasPathTo(i)) {
@@ -65,7 +67,12 @@ public class SAP {
                 }
             }
         }
-        return spa;
+        if (shortestPath == Integer.MAX_VALUE) shortestPath = -1;
+
+        returnValues[0] = shortestPath;
+        returnValues[1] = spa;
+
+        return returnValues;
     }
 
 
@@ -77,7 +84,8 @@ public class SAP {
         BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
         BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
 
-        return shortestLength(vBFS, wBFS);
+        int[] result = spa(vBFS, wBFS);
+        return result[0];
     }
 
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
@@ -88,7 +96,8 @@ public class SAP {
         BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
         BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
 
-        return spa(vBFS, wBFS);
+        int[] result = spa(vBFS, wBFS);
+        return result[1];
     }
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
@@ -103,10 +112,13 @@ public class SAP {
 
         // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from iterable v and iterable w
         // implicitly check if v and w are null or if v and w contains null item in BreadthFirstDirectedPaths's constructor
-        BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
-        BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
+        BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph,
+                                                                       v); // calculated vBFS can be saved for later use
+        BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph,
+                                                                       w); // calculated wBFS can be saved for later use
 
-        return shortestLength(vBFS, wBFS);
+        int[] result = spa(vBFS, wBFS);
+        return result[0];
     }
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
@@ -120,10 +132,13 @@ public class SAP {
 
         // construct 2 BreadthFirstDirectedPaths objects to conduct the BFS from v and w
         // implicitly check if v and w are null or if v and w contains null item in BreadthFirstDirectedPaths's constructor
-        BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph, v);
-        BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph, w);
+        BreadthFirstDirectedPaths vBFS = new BreadthFirstDirectedPaths(digraph,
+                                                                       v); // calculated vBFS can be saved for later use
+        BreadthFirstDirectedPaths wBFS = new BreadthFirstDirectedPaths(digraph,
+                                                                       w); // calculated wBFS can be saved for later use
 
-        return spa(vBFS, wBFS);
+        int[] result = spa(vBFS, wBFS);
+        return result[1];
     }
 
 

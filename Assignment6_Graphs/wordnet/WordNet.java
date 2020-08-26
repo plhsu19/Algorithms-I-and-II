@@ -21,6 +21,7 @@ public class WordNet {
     private final HashMap<String, Stack<Integer>> synsetMap; // noun => [2, 5, 3, 9]
     private final HashMap<Integer, String> nounMap; // 3: "A-horizon A_horizon"
     private final Digraph wordnet;
+    private final SAP shortestAncestralPath;
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -50,6 +51,8 @@ public class WordNet {
         // check if wordnet is  single rooted
         checkSingleRooted();
 
+        // create the SAP of digraph wordnet
+        shortestAncestralPath = new SAP(wordnet);
     }
 
     private void checkArgument(Object arg) {
@@ -132,19 +135,6 @@ public class WordNet {
     }
 
 
-    // helper function DFS used to check if wordnet (digraph) is acyclic
-    // private void DFS(int v) {
-    //     // if the vertex is already
-    //     marked[v] = true;
-    //
-    //     for (int w : wordnet.adj(v)) {
-    //         if (marked[v]) throw new IllegalArgumentException("the input digraph is not acyclic!");
-    //         DFS(w);
-    //     }
-    //
-    // }
-
-
     // returns all WordNet nouns
     public Iterable<String> nouns() {
         return synsetMap.keySet();
@@ -166,7 +156,6 @@ public class WordNet {
         // Check if any of the noun arguments is not a WordNet noun
         if (!isNoun(nounA) || !isNoun(nounB)) throwNounNotExistException();
 
-        SAP shortestAncestralPath = new SAP(wordnet);
         int d = shortestAncestralPath.length(synsetMap.get(nounA), synsetMap.get(nounB));
 
         return d;
@@ -183,7 +172,6 @@ public class WordNet {
         // Check if any of the noun arguments is not a WordNet noun
         if (!isNoun(nounA) || !isNoun(nounB)) throwNounNotExistException();
 
-        SAP shortestAncestralPath = new SAP(wordnet);
         int ancestor = shortestAncestralPath.ancestor(synsetMap.get(nounA), synsetMap.get(nounB));
 
         return nounMap.get(ancestor);
